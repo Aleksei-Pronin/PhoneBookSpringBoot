@@ -80,6 +80,17 @@ public class PhoneBookController {
         return new ResponseDto(true, null);
     }
 
+    @DeleteMapping
+    public ResponseDto deleteContacts(@RequestBody List<Integer> contactIds) {
+        try {
+            contactsService.delete(contactIds);
+        } catch (IllegalArgumentException e) {
+            return new ResponseDto(false, e.getMessage());
+        }
+
+        return new ResponseDto(true, null);
+    }
+
     private String validateAndNormalize(Contact contact) {
         String surname = normalize(contact.getSurname());
         String name = normalize(contact.getName());

@@ -35,6 +35,11 @@ public class ContactsServiceImpl implements ContactsService {
     }
 
     @Override
+    public void delete(List<Integer> contactIds) {
+        contactsRepository.delete(contactIds);
+    }
+
+    @Override
     public boolean isPhoneExists(String phone, int contactId) {
         return contactsRepository.isPhoneExists(phone, contactId);
     }
