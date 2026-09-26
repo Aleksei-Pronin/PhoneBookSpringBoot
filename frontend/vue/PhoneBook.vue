@@ -225,11 +225,7 @@ export default {
         },
 
         getContacts() {
-            const request = this.searchText.trim()
-                ? this.service.searchContacts(this.searchText)
-                : this.service.getContacts();
-
-            request
+            this.service.getContacts(this.searchText)
                 .then(contacts => {
                     this.contacts = contacts.map(contact => ({
                         ...contact,
