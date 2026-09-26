@@ -5,7 +5,9 @@ import ru.academits.phonebookspringboot.data.Contact;
 import java.util.List;
 
 public interface ContactsService {
-    List<Contact> getAll(String term);
+    List<Contact> getAll();
+
+    List<Contact> search(String term);
 
     void create(Contact contact);
 

@@ -1,5 +1,6 @@
 package ru.academits.phonebookspringboot.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -10,13 +11,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.academits.phonebookspringboot.data.Contact;
-import ru.academits.phonebookspringboot.data.ResponseDto;
+import ru.academits.phonebookspringboot.data.BaseResponse;
 import ru.academits.phonebookspringboot.service.ContactsService;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/contact")
+@Slf4j
 public class PhoneBookController {
     private final ContactsService contactsService;
 
@@ -26,36 +28,44 @@ public class PhoneBookController {
 
     @GetMapping
     public List<Contact> getContacts(@RequestParam(required = false) String term) {
-        return contactsService.getAll(term);
+        if (term == null || term.isBlank()) {
+            return contactsService.getAll();
+        }
+
+        return contactsService.search(term);
     }
 
     @PostMapping
-    public ResponseDto createContact(@RequestBody Contact contact) {
+    public BaseResponse createContact(@RequestBody Contact contact) {
         String validationMessage = validateAndNormalize(contact);
 
         if (validationMessage != null) {
-            return new ResponseDto(false, validationMessage);
+            log.warn("Validation failed on create: {}", validationMessage);
+            return BaseResponse.error(validationMessage);
         }
 
         if (contactsService.isPhoneExists(contact.getPhone(), 0)) {
-            return new ResponseDto(false, "Уже есть другой контакт с таким номером");
+            log.warn("Attempt to create contact with existing phone: {}", contact.getPhone());
+            return BaseResponse.error("Уже есть другой контакт с таким номером");
         }
 
         contactsService.create(contact);
 
-        return new ResponseDto(true, null);
+        return BaseResponse.success();
     }
 
     @PutMapping("/{id}")
-    public ResponseDto updateContact(@PathVariable int id, @RequestBody Contact contact) {
+    public BaseResponse updateContact(@PathVariable int id, @RequestBody Contact contact) {
         String validationMessage = validateAndNormalize(contact);
 
         if (validationMessage != null) {
-            return new ResponseDto(false, validationMessage);
+            log.warn("Validation failed on update, id={}: {}", id, validationMessage);
+            return BaseResponse.error(validationMessage);
         }
 
         if (contactsService.isPhoneExists(contact.getPhone(), id)) {
-            return new ResponseDto(false, "Уже есть другой контакт с таким номером");
+            log.warn("Attempt to update contact id={} to existing phone: {}", id, contact.getPhone());
+            return BaseResponse.error("Уже есть другой контакт с таким номером");
         }
 
         contact.setId(id);
@@ -63,32 +73,35 @@ public class PhoneBookController {
         try {
             contactsService.update(contact);
         } catch (IllegalArgumentException e) {
-            return new ResponseDto(false, e.getMessage());
+            log.warn("Update failed, id={}: {}", id, e.getMessage());
+            return BaseResponse.error(e.getMessage());
         }
 
-        return new ResponseDto(true, null);
+        return BaseResponse.success();
     }
 
     @DeleteMapping("/{id}")
-    public ResponseDto deleteContact(@PathVariable int id) {
+    public BaseResponse deleteContact(@PathVariable int id) {
         try {
             contactsService.delete(id);
         } catch (IllegalArgumentException e) {
-            return new ResponseDto(false, e.getMessage());
+            log.warn("Delete failed, id={}: {}", id, e.getMessage());
+            return BaseResponse.error(e.getMessage());
         }
 
-        return new ResponseDto(true, null);
+        return BaseResponse.success();
     }
 
     @DeleteMapping
-    public ResponseDto deleteContacts(@RequestBody List<Integer> contactIds) {
+    public BaseResponse deleteContacts(@RequestBody List<Integer> contactIds) {
         try {
             contactsService.delete(contactIds);
         } catch (IllegalArgumentException e) {
-            return new ResponseDto(false, e.getMessage());
+            log.warn("Bulk delete failed, ids={}: {}", contactIds, e.getMessage());
+            return BaseResponse.error(e.getMessage());
         }
 
-        return new ResponseDto(true, null);
+        return BaseResponse.success();
     }
 
     private String validateAndNormalize(Contact contact) {

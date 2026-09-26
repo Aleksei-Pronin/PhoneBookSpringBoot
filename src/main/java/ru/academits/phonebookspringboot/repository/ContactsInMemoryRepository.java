@@ -13,18 +13,19 @@ public class ContactsInMemoryRepository implements ContactsRepository {
     private final AtomicInteger currentContactId = new AtomicInteger(1);
 
     @Override
-    public List<Contact> getAll(String term) {
+    public List<Contact> getAll() {
         synchronized (contacts) {
-            if (term == null || term.isBlank()) {
-                return contacts.stream()
-                        .map(Contact::new)
-                        .toList();
-            }
-
-            String upperCaseTerm = term.trim().toUpperCase();
-
             return contacts.stream()
-                    .filter(contact -> getFullContactString(contact).contains(upperCaseTerm))
+                    .map(Contact::new)
+                    .toList();
+        }
+    }
+
+    @Override
+    public List<Contact> search(String term) {
+        synchronized (contacts) {
+            return contacts.stream()
+                    .filter(contact -> getFullContactString(contact).contains(term.trim().toUpperCase()))
                     .map(Contact::new)
                     .toList();
         }

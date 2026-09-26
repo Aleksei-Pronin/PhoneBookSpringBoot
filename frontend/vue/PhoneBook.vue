@@ -20,7 +20,7 @@
                             </button>
                         </form>
 
-                        <button v-if="selectedContacts.length > 0" @click="deleteSelected"
+                        <button @click="deleteSelected" :disabled="selectedContacts.length === 0"
                                 class="btn btn-outline-danger mb-3" type="button">
                             <i class="bi bi-trash me-1"></i>
                             Удалить выбранные
@@ -225,7 +225,11 @@ export default {
         },
 
         getContacts() {
-            this.service.getContacts(this.searchText)
+            const request = this.searchText.trim()
+                ? this.service.searchContacts(this.searchText)
+                : this.service.getContacts();
+
+            request
                 .then(contacts => {
                     this.contacts = contacts.map(contact => ({
                         ...contact,
