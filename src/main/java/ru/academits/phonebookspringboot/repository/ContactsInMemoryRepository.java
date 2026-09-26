@@ -24,8 +24,13 @@ public class ContactsInMemoryRepository implements ContactsRepository {
     @Override
     public List<Contact> search(String term) {
         synchronized (contacts) {
+            String upperCaseTerm = term.trim().toUpperCase();
+
             return contacts.stream()
-                    .filter(contact -> getFullContactString(contact).contains(term.trim().toUpperCase()))
+                    .filter(contact ->
+                            contact.getSurname().toUpperCase().contains(upperCaseTerm)
+                                    || contact.getName().toUpperCase().contains(upperCaseTerm)
+                                    || contact.getPhone().toUpperCase().contains(upperCaseTerm))
                     .map(Contact::new)
                     .toList();
         }
@@ -88,9 +93,5 @@ public class ContactsInMemoryRepository implements ContactsRepository {
                     .anyMatch(contact ->
                             contact.getId() != contactId && contact.getPhone().toUpperCase().equals(upperCasePhone));
         }
-    }
-
-    private String getFullContactString(Contact contact) {
-        return (contact.getSurname() + " " + contact.getName() + " " + contact.getPhone()).toUpperCase();
     }
 }
