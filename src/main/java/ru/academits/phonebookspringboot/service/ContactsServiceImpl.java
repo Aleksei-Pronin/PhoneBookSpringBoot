@@ -16,28 +16,52 @@ public class ContactsServiceImpl implements ContactsService {
         this.contactsRepository = contactsRepository;
     }
 
-    @Override
-    public List<Contact> getAll() {
-        List<Contact> contacts = contactsRepository.getAll();
-        log.debug("Loaded {} contact(s)", contacts.size());
-        return contacts;
-    }
+    public List<Contact> get(String term) {
+        if (term == null || term.isBlank()) {
+            List<Contact> contacts = contactsRepository.getAll();
+            log.debug("Loaded {} contact(s)", contacts.size());
+            return contacts;
+        }
 
-    @Override
-    public List<Contact> search(String term) {
-        List<Contact> contacts = contactsRepository.search(term);
-        log.info("Found {} contact(s)", contacts.size());
+        List<Contact> contacts = contactsRepository.search(term.trim());
+        log.debug("Found {} contact(s)", contacts.size());
         return contacts;
     }
 
     @Override
     public void create(Contact contact) {
+        String validationMessage = validateAndNormalize(contact);
+
+        if (validationMessage != null) {
+            log.warn("Validation failed on create: {}", validationMessage);
+            throw new IllegalArgumentException(validationMessage);
+        }
+
+        if (isPhoneExists(contact.getPhone(), 0)) {
+            log.warn("Attempt to create contact with existing phone: {}", contact.getPhone());
+            throw new IllegalArgumentException("Уже есть другой контакт с таким номером");
+        }
+
         contactsRepository.create(contact);
         log.info("Contact created: {}", contact);
     }
 
     @Override
-    public void update(Contact contact) {
+    public void update(int id, Contact contact) {
+        String validationMessage = validateAndNormalize(contact);
+
+        if (validationMessage != null) {
+            log.warn("Validation failed on update, id={}: {}", id, validationMessage);
+            throw new IllegalArgumentException(validationMessage);
+        }
+
+        if (isPhoneExists(contact.getPhone(), id)) {
+            log.warn("Attempt to update contactDto id={} to existing phone: {}", id, contact.getPhone());
+            throw new IllegalArgumentException("Уже есть другой контакт с таким номером");
+        }
+
+        contact.setId(id);
+
         contactsRepository.update(contact);
         log.info("Contact updated: {}", contact);
     }
@@ -54,10 +78,37 @@ public class ContactsServiceImpl implements ContactsService {
         log.info("Contacts deleted, ids={}", contactIds);
     }
 
-    @Override
-    public boolean isPhoneExists(String phone, int contactId) {
+    private boolean isPhoneExists(String phone, int contactId) {
         boolean exists = contactsRepository.isPhoneExists(phone, contactId);
         log.debug("Phone check, phone={}, contactId={}, exists={}", phone, contactId, exists);
         return exists;
+    }
+
+    private String validateAndNormalize(Contact contact) {
+        String surname = normalize(contact.getSurname());
+        String name = normalize(contact.getName());
+        String phone = normalize(contact.getPhone());
+
+        if (surname.isEmpty()) {
+            return "Необходимо заполнить фамилию";
+        }
+
+        if (name.isEmpty()) {
+            return "Необходимо заполнить имя";
+        }
+
+        if (phone.isEmpty()) {
+            return "Необходимо заполнить номер телефона";
+        }
+
+        contact.setSurname(surname);
+        contact.setName(name);
+        contact.setPhone(phone);
+
+        return null;
+    }
+
+    private String normalize(String value) {
+        return value == null ? "" : value.trim();
     }
 }

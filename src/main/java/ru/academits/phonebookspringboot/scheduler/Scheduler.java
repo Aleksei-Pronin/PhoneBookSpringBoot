@@ -21,7 +21,7 @@ public class Scheduler {
 
     @Scheduled(fixedRate = 10000)
     public void deleteRandomContact() {
-        List<Contact> contacts = contactsService.getAll();
+        List<Contact> contacts = contactsService.get("");
 
         if (contacts.isEmpty()) {
             return;
