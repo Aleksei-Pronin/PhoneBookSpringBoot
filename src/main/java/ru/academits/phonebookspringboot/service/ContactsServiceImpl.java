@@ -1,5 +1,6 @@
 package ru.academits.phonebookspringboot.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.academits.phonebookspringboot.data.Contact;
@@ -9,12 +10,9 @@ import java.util.List;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class ContactsServiceImpl implements ContactsService {
     private final ContactsRepository contactsRepository;
-
-    public ContactsServiceImpl(ContactsRepository contactsRepository) {
-        this.contactsRepository = contactsRepository;
-    }
 
     public List<Contact> get(String term) {
         if (term == null || term.isBlank()) {
