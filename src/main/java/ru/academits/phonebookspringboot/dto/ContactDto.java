@@ -7,10 +7,7 @@ import lombok.Setter;
 @Setter
 public class ContactDto {
     private Integer id;
-
     private String surname;
-
     private String name;
-
     private String phone;
 }

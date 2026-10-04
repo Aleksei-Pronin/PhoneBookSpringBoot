@@ -14,6 +14,6 @@ public class Contact {
     private String phone;
 
     public Contact(Contact contact) {
-        this(contact.id, contact.surname, contact.getName(), contact.getPhone());
+        this(contact.id, contact.surname, contact.name, contact.phone);
     }
 }

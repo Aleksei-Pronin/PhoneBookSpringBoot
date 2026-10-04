@@ -19,7 +19,7 @@ public class Scheduler {
         this.contactsService = contactsService;
     }
 
-    @Scheduled(fixedRate = 1000000)
+    @Scheduled(fixedRate = 10000)
     public void deleteRandomContact() {
         List<Contact> contacts = contactsService.get("");
 

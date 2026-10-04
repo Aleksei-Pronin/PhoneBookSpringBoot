@@ -1,5 +1,6 @@
 package ru.academits.phonebookspringboot.repository;
 
+import ru.academits.phonebookspringboot.data.BaseResponse;
 import ru.academits.phonebookspringboot.data.Contact;
 
 import java.util.List;
@@ -9,13 +10,13 @@ public interface ContactsRepository {
 
     List<Contact> search(String term);
 
-    void create(Contact contact);
+    BaseResponse create(Contact contact);
 
-    void update(Contact contact);
+    BaseResponse update(Contact contact, int contactId);
 
-    void delete(int contactId);
+    BaseResponse delete(int contactId);
 
-    void delete(List<Integer> contactIds);
+    BaseResponse delete(List<Integer> contactIds);
 
     boolean isPhoneExists(String phone, int contactId);
 }

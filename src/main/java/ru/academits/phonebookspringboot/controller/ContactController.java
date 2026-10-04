@@ -32,26 +32,22 @@ public class ContactController {
     }
 
     @PostMapping
-    public BaseResponse createContact(@RequestBody ContactDto contactDto) {
-        contactsService.create(contactDtoToContactConverter.convert(contactDto));
-        return BaseResponse.success();
+    public BaseResponse createContact(@RequestBody ContactDto contact) {
+        return contactsService.create(contactDtoToContactConverter.convert(contact));
     }
 
     @PutMapping("/{id}")
-    public BaseResponse updateContact(@PathVariable int id, @RequestBody ContactDto contactDto) {
-        contactsService.update(id, contactDtoToContactConverter.convert(contactDto));
-        return BaseResponse.success();
+    public BaseResponse updateContact(@RequestBody ContactDto contact, @PathVariable int id) {
+        return contactsService.update(contactDtoToContactConverter.convert(contact), id);
     }
 
     @DeleteMapping("/{id}")
     public BaseResponse deleteContact(@PathVariable int id) {
-        contactsService.delete(id);
-        return BaseResponse.success();
+        return contactsService.delete(id);
     }
 
     @DeleteMapping
     public BaseResponse deleteContacts(@RequestBody List<Integer> contactIds) {
-        contactsService.delete(contactIds);
-        return BaseResponse.success();
+        return contactsService.delete(contactIds);
     }
 }

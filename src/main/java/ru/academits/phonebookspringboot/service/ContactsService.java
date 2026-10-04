@@ -1,5 +1,6 @@
 package ru.academits.phonebookspringboot.service;
 
+import ru.academits.phonebookspringboot.data.BaseResponse;
 import ru.academits.phonebookspringboot.data.Contact;
 
 import java.util.List;
@@ -7,11 +8,11 @@ import java.util.List;
 public interface ContactsService {
     List<Contact> get(String term);
 
-    void create(Contact contact);
+    BaseResponse create(Contact contact);
 
-    void update(int id, Contact contact);
+    BaseResponse update(Contact contact, int contactId);
 
-    void delete(int contactId);
+    BaseResponse delete(int contactId);
 
-    void delete(List<Integer> contactIds);
+    BaseResponse delete(List<Integer> contactIds);
 }
