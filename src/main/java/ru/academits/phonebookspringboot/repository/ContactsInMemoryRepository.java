@@ -103,13 +103,19 @@ public class ContactsInMemoryRepository implements ContactsRepository {
     }
 
     @Override
-    public boolean isPhoneExists(String phone, int contactId) {
-        String upperCasePhone = phone.toUpperCase();
+    public boolean isPhoneExists(String phone) {
+        synchronized (contacts) {
+            return contacts.stream()
+                    .anyMatch(contact -> contact.getPhone().equalsIgnoreCase(phone));
+        }
+    }
 
+    @Override
+    public boolean isPhoneExists(String phone, int excludedId) {
         synchronized (contacts) {
             return contacts.stream()
                     .anyMatch(contact ->
-                            contact.getId() != contactId && contact.getPhone().toUpperCase().equals(upperCasePhone));
+                            contact.getId() != excludedId && contact.getPhone().equalsIgnoreCase(phone));
         }
     }
 }

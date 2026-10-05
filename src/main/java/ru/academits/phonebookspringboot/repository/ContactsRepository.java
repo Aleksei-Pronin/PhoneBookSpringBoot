@@ -18,5 +18,7 @@ public interface ContactsRepository {
 
     BaseResponse delete(List<Integer> contactIds);
 
-    boolean isPhoneExists(String phone, int contactId);
+    boolean isPhoneExists(String phone);
+
+    boolean isPhoneExists(String phone, int excludedId);
 }

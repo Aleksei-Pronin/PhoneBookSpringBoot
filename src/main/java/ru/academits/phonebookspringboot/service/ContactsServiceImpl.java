@@ -8,6 +8,7 @@ import ru.academits.phonebookspringboot.data.Contact;
 import ru.academits.phonebookspringboot.repository.ContactsRepository;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 @Service
 @Slf4j
@@ -30,7 +31,7 @@ public class ContactsServiceImpl implements ContactsService {
 
     @Override
     public BaseResponse create(Contact contact) {
-        BaseResponse validationResult = validateAndNormalize(contact, 0);
+        BaseResponse validationResult = validateAndNormalize(contact);
         return !validationResult.isSuccess() ? validationResult : contactsRepository.create(contact);
     }
 
@@ -50,7 +51,7 @@ public class ContactsServiceImpl implements ContactsService {
         return contactsRepository.delete(contactIds);
     }
 
-    private BaseResponse validateAndNormalize(Contact contact, int contactId) {
+    private BaseResponse validateAndNormalize(Contact contact, Predicate<String> isPhoneTaken) {
         String surname = normalize(contact.getSurname());
         String name = normalize(contact.getName());
         String phone = normalize(contact.getPhone());
@@ -70,8 +71,8 @@ public class ContactsServiceImpl implements ContactsService {
             return BaseResponse.error("Необходимо заполнить номер телефона");
         }
 
-        if (contactsRepository.isPhoneExists(phone, contactId)) {
-            log.warn("Attempt to use existing phone: {}", phone);
+        if (isPhoneTaken.test(phone)) {
+            log.warn("Phone is already taken: {}", phone);
             return BaseResponse.error("Уже есть другой контакт с таким номером");
         }
 
@@ -80,6 +81,14 @@ public class ContactsServiceImpl implements ContactsService {
         contact.setPhone(phone);
 
         return BaseResponse.success();
+    }
+
+    private BaseResponse validateAndNormalize(Contact contact) {
+        return validateAndNormalize(contact, contactsRepository::isPhoneExists);
+    }
+
+    private BaseResponse validateAndNormalize(Contact contact, int contactId) {
+        return validateAndNormalize(contact, phone -> contactsRepository.isPhoneExists(phone, contactId));
     }
 
     private String normalize(String value) {
