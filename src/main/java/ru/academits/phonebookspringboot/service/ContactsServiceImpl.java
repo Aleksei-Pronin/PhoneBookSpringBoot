@@ -15,6 +15,7 @@ import java.util.List;
 public class ContactsServiceImpl implements ContactsService {
     private final ContactsRepository contactsRepository;
 
+    @Override
     public List<Contact> get(String term) {
         if (term == null || term.isBlank()) {
             List<Contact> contacts = contactsRepository.getAll();
